@@ -11,7 +11,6 @@ ENV USER_NAME=www-data
 ARG GROUP_NAME=www-data
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
     curl \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -22,7 +21,6 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     librdkafka-dev \
     libpq-dev \
-    openssh-server \
     zip \
     unzip \
     supervisor \
@@ -30,9 +28,6 @@ RUN apt-get update && apt-get install -y \
     nano \
     cron
 
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash -
- # Install Node    
-RUN apt-get install -y nodejs     
 # Install nginx 
 RUN apt-get update && apt-get install -y nginx
 
@@ -41,23 +36,19 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions zip, mbstring, exif, bcmath, intl
 RUN docker-php-ext-configure gd
-RUN docker-php-ext-install  zip mbstring exif pcntl bcmath -j$(nproc) gd intl
+RUN docker-php-ext-install pdo pdo_mysql opcache gmp mysqli curl pdo_pgsql zip mbstring exif pcntl bcmath -j$(nproc) gd intl
 
-# Install Redis and enable it
-RUN pecl install redis  && docker-php-ext-enable redis
+#RUN apt update && apt-get install -y --no-install-recommends sendmail libpq-dev  libgmp-dev curl zlib1g-dev libpng-dev libssl-dev libcurl4-openssl-dev libcurl4 libzip-dev libwebp-dev libpng-dev libfreetype6-dev libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libmemcached-dev nano
 
+RUN docker-php-ext-install pdo_mysql opcache  gmp mysqli curl zip   pdo pdo_pgsql && docker-php-ext-enable pdo_mysql opcache  gmp mysqli curl zip pdo pdo_pgsql
+RUN install-php-extensions redis pcntl && docker-php-ext-enable redis pcntl
+RUN docker-php-ext-configure gd --enable-gd  --with-freetype --with-jpeg --with-webp && docker-php-ext-install gd && docker-php-ext-enable gd
 
+# clean
+RUN rm /usr/local/bin/install-php-extensions && apt clean && rm -rf /var/lib/apt/lists/* && rm -rf /var/lib/{apt,dpkg,cache,log}/ && rm -rf /tmp/*
+# setup
+RUN echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/opcache-recommended.ini && echo "opcache.interned_strings_buffer=8" >> /usr/local/etc/php/conf.d/opcache-recommended.ini && echo "opcache.max_accelerated_files=4000" >> /usr/local/etc/php/conf.d/opcache-recommended.ini && echo "opcache.revalidate_freq=2" >> /usr/local/etc/php/conf.d/opcache-recommended.ini && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/opcache-recommended.ini
 
-# Install the php memcached extension
-RUN pecl install memcached && docker-php-ext-enable memcached
-
-# Install the PHP pdo_mysql extention
-RUN docker-php-ext-install pdo_mysql
-
-# Install the PHP pdo_pgsql extention
-RUN docker-php-ext-install pdo_pgsql
-# Install PHP Opcache extention
-RUN docker-php-ext-install opcache
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
