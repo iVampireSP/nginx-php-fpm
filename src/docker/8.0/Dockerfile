@@ -4,14 +4,13 @@ ENV DOCUMENT_ROOT=${WORKDIR}
 ENV LARAVEL_PROCS_NUMBER=1
 ENV DOMAIN=_
 ENV CLIENT_MAX_BODY_SIZE=15M
-ENV NODE_VERSION=17.x
 ARG GROUP_ID=1000
 ARG USER_ID=1000
 ENV USER_NAME=www-data
 ARG GROUP_NAME=www-data
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
     curl \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
@@ -22,13 +21,17 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     librdkafka-dev \
     libpq-dev \
-    openssh-server \
+    libgmp-dev \ 
+    zlib1g-dev \ 
+    libssl-dev \ 
+    libcurl4-openssl-dev libcurl4 libwebp-dev libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libmemcached-dev \
     zip \
     unzip \
     supervisor \
     sqlite3  \
     nano \
-    cron
+    cron \
+    nginx
 
 RUN curl -sL https://deb.nodesource.com/setup_${NODE_VERSION} | bash -
  # Install Node    
@@ -51,25 +54,19 @@ RUN docker-php-ext-enable rdkafka \
      && cd .. \
     && rm -rf /php-rdkafka
 
+    
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+
 # Install PHP extensions zip, mbstring, exif, bcmath, intl
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install  zip mbstring exif pcntl bcmath -j$(nproc) gd intl
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp 
 
-# Install Redis and enable it
-RUN pecl install redis  && docker-php-ext-enable redis
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
+RUN docker-php-ext-install -j$(nproc) pdo_mysql opcache intl gmp mysqli curl zip mbstring exif pdo pdo_pgsql gd && docker-php-ext-enable pdo_mysql opcache intl gmp mysqli curl zip mbstring exif pdo pdo_pgsql gd
+RUN install-php-extensions redis pcntl && docker-php-ext-enable redis pcntl
+# clean
+RUN rm /usr/local/bin/install-php-extensions && apt clean && rm -rf /var/lib/apt/lists/* && rm -rf /var/lib/{apt,dpkg,cache,log}/ && rm -rf /tmp/*
 
-
-# Install the php memcached extension
-RUN pecl install memcached && docker-php-ext-enable memcached
-
-# Install the PHP pdo_mysql extention
-RUN docker-php-ext-install pdo_mysql
-
-# Install the PHP pdo_pgsql extention
-RUN docker-php-ext-install pdo_pgsql
-# Install PHP Opcache extention
-RUN docker-php-ext-install opcache
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
