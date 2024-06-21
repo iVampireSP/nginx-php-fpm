@@ -41,10 +41,13 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
+COPY src/ext/swoole_loader80.so /usr/local/lib/php/extensions/no-debug-non-zts-20200930
+
 
 RUN docker-php-ext-install -j$(nproc) pdo_mysql opcache intl gmp mysqli curl zip mbstring exif pdo pdo_pgsql gd && \
     docker-php-ext-enable pdo_mysql opcache intl gmp mysqli curl zip mbstring exif pdo pdo_pgsql gd && \
     install-php-extensions redis pcntl && docker-php-ext-enable redis pcntl && \
+    docker-php-ext-enable swoole_loader80 && \
     # clean
     rm /usr/local/bin/install-php-extensions && \
     apt clean && rm -rf /var/lib/apt/lists/* && \
