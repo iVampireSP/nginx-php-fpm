@@ -67,6 +67,7 @@ RUN rm -rf /etc/nginx/conf.d/default.conf && rm -rf /etc/nginx/sites-enabled/def
 COPY src/nginx.conf /etc/nginx/nginx.conf
 COPY src/default.conf /etc/nginx/conf.d/
 COPY src/fpm-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+COPY src/php-fpm /etc/init.d/php-fpm
 
 RUN usermod -u ${USER_ID} ${USER_NAME} && \
     groupmod -g ${USER_ID} ${GROUP_NAME} && \
