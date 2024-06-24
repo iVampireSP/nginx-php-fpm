@@ -43,7 +43,7 @@ if [ -f /var/www/conf/extend-php.ini ]; then
     cp /var/www/conf/extend-php.ini /usr/local/etc/php/conf.d/extend-php.ini
 fi
 
-service php-fpm.sh start
+service php-fpm start
 
 # start nginx
 nginx -g 'daemon off;'
