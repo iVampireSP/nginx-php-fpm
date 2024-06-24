@@ -1,7 +1,6 @@
-[![Build](https://github.com/jkaninda/nginx-php-fpm/actions/workflows/build.yml/badge.svg)](https://github.com/jkaninda/nginx-php-fpm/actions/workflows/build.yml)
-[![Integration Testing](https://github.com/jkaninda/nginx-php-fpm/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/jkaninda/nginx-php-fpm/actions/workflows/integration-tests.yml)
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/jkaninda/nginx-php-fpm?style=flat-square)
-![Docker Pulls](https://img.shields.io/docker/pulls/jkaninda/nginx-php-fpm?style=flat-square)
+# Note
+
+I removed supervisor, use init.d instead.
 
 # Nginx PHP-FPM Docker image
 
@@ -34,7 +33,6 @@
 * Memcached
 * Laravel Cron Job
 * Laravel Schedule
-* Supervisord
 * Nodejs
 * NPM
 
@@ -131,25 +129,7 @@ USER www-data
 
 > /var/www/html/conf/nginx/nginx-site.conf
 
-## Supervisord
-### Add more supervisor process in
-> /etc/supervisor/conf.d/
 
-In case you want to execute and maintain a task or process with supervisor.
-
-Find below an example with Apache Kafka, when you want to maintain a consumer process.
-### Example:
-```conf
-[program:kafkaconsume-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/html/artisan kafka:consumer
-autostart=true
-autorestart=true
-numprocs=1
-user=www-data
-redirect_stderr=true
-stdout_logfile=/var/www/html/storage/logs/kafka.log
-```
 
 ### Storage permision issue
 ```sh
