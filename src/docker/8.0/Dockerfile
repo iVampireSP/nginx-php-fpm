@@ -28,7 +28,6 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev libcurl4 libwebp-dev libjpeg-dev libfreetype6-dev libjpeg62-turbo-dev libmemcached-dev \
     zip \
     unzip \
-    supervisor \
     sqlite3  \
     nano \
     cron \
@@ -59,7 +58,7 @@ WORKDIR $WORKDIR
 ADD src/index.php $WORKDIR/index.php
 ADD src/php.ini $PHP_INI_DIR/conf.d/
 ADD src/opcache.ini $PHP_INI_DIR/conf.d/
-ADD src/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+COPY src/php-fpm /etc/init.d/php-fpm
 
 COPY src/entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh && \
@@ -68,22 +67,19 @@ RUN chmod +x /usr/local/bin/entrypoint.sh && \
 
 COPY src/nginx.conf /etc/nginx/nginx.conf
 COPY src/default.conf /etc/nginx/conf.d/
-COPY src/fpm-docker.conf /usr/local/etc/php-fpm.d/docker.conf
+COPY src/fpm-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
 RUN usermod -u ${USER_ID} ${USER_NAME} && \
     groupmod -g ${USER_ID} ${GROUP_NAME} && \
-    mkdir -p /var/log/supervisor  && \
     mkdir -p /var/log/nginx  && \
     mkdir -p /var/cache/nginx  && \
     chown -R ${USER_NAME}:${GROUP_NAME} /var/www && \
     chown -R ${USER_NAME}:${GROUP_NAME} /var/log/ && \
-    chown -R ${USER_NAME}:${GROUP_NAME} /etc/supervisor/conf.d/ && \
     chown -R ${USER_NAME}:${GROUP_NAME} $PHP_INI_DIR/conf.d/ && \
     touch /var/run/nginx.pid && \
     chown -R $USER_NAME:$USER_NAME /var/cache/nginx && \
     chown -R $USER_NAME:$USER_NAME /var/lib/nginx/ && \
     chown -R $USER_NAME:$USER_NAME /var/run/nginx.pid && \
-    chown -R $USER_NAME:$USER_NAME /var/log/supervisor && \
     chown -R $USER_NAME:$USER_NAME /etc/nginx/nginx.conf && \
     chown -R $USER_NAME:$USER_NAME /etc/nginx/conf.d/ && \
     chown -R ${USER_NAME}:${GROUP_NAME} /tmp
