@@ -68,6 +68,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh && \
 COPY src/nginx.conf /etc/nginx/nginx.conf
 COPY src/default.conf /etc/nginx/conf.d/
 COPY src/fpm-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+COPY src/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN usermod -u ${USER_ID} ${USER_NAME} && \
     groupmod -g ${USER_ID} ${GROUP_NAME} && \
