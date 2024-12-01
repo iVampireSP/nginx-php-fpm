@@ -1,4 +1,5 @@
 FROM php:8.2-fpm
+
 ARG WORKDIR=/var/www/html
 ENV DOCUMENT_ROOT=${WORKDIR}
 ENV LARAVEL_PROCS_NUMBER=1
@@ -59,7 +60,6 @@ RUN docker-php-ext-install  zip mbstring exif pcntl bcmath -j$(nproc) gd intl
 RUN pecl install redis  && docker-php-ext-enable redis
 
 
-
 # Install the php memcached extension
 RUN pecl install memcached && docker-php-ext-enable memcached
 
@@ -113,9 +113,9 @@ RUN chown -R ${USER_NAME}:${GROUP_NAME} /var/www && \
   touch /var/run/nginx.pid && \
   chown -R $USER_NAME:$USER_NAME /var/cache/nginx && \
   chown -R $USER_NAME:$USER_NAME /var/lib/nginx/ && \
-  chown -R $USER_NAME:$USER_NAME /etc/nginx/nginx.conf && \
   chown -R $USER_NAME:$USER_NAME /var/run/nginx.pid && \
   chown -R $USER_NAME:$USER_NAME /var/log/supervisor && \
+  chown -R $USER_NAME:$USER_NAME /etc/nginx/nginx.conf && \
   chown -R $USER_NAME:$USER_NAME /etc/nginx/conf.d/ && \
   chown -R ${USER_NAME}:${GROUP_NAME} /tmp
 
